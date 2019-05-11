@@ -1,4 +1,4 @@
-# EPUB_Taiwanize Epub簡繁橫直互轉
+# EPUB_Taiwanize
   
 Convert EPUB from zh_CN to zh_TW using [ZHConvert](https://zhconvert.org/)
 
