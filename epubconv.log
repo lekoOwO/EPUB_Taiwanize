@@ -1,0 +1,8 @@
+2019-05-11 21:53:49 >> config.load : 缺少設定檔
+2019-05-11 21:54:09 >> config.load : 缺少設定檔
+2019-05-11 21:54:38 >> config.load : 缺少設定檔
+2019-05-11 21:55:18 >> config.load : 讀取設定檔發生錯誤 -> [Errno 2] No such file or directory: '/Users/yuhan/rex/code/EpubConv_Python\\config.json'
+2019-05-11 21:56:12 >> Convert.convert : 轉換發生錯誤 -> [Errno 2] No such file or directory: '/Users/yuhan/Downloads/【WEB】带着智慧型手机闯荡异世界。.epub_files\\OEBPS/content.opf'
+2019-05-11 21:56:12 >> Convert.encoding : [Errno 2] No such file or directory: '/Users/yuhan/Downloads/【WEB】带着智慧型手机闯荡异世界。.epub_files\\OEBPS/content.opf'
+2019-05-11 21:59:03 >> Convert.convert : 轉換發生錯誤 -> [Errno 2] No such file or directory: '/Users/yuhan/Downloads/【WEB】带着智慧型手机闯荡异世界。.epub_files\\OEBPS/content.opf'
+2019-05-11 21:59:03 >> Convert.encoding : [Errno 2] No such file or directory: '/Users/yuhan/Downloads/【WEB】带着智慧型手机闯荡异世界。.epub_files\\OEBPS/content.opf'

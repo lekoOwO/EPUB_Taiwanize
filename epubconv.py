@@ -2,9 +2,9 @@
 import zipfile, os, glob, sys, shutil, chardet
 
 ##########################################################
-# Author: Yichen Huang (Eugene)
-# GitHub: https://github.com/yichen0831/opencc-python
-# January, 2016
+# Author: Yichen Huang (Eugene), Rex Tseng
+# GitHub: https://github.com/rexx0520/opencc-python
+# May, 2019
 ##########################################################
 
 ##########################################################
@@ -23,158 +23,19 @@ import zipfile, os, glob, sys, shutil, chardet
 #   and Python >3.2
 ##########################################################
 
+##########################################################
+# 本翻譯服務由繁化姬 API 提供
+##########################################################
+
 import io
 import os
 import json
 import re
 import sys
+import requests
 
 CONFIG_DIR = 'config'
 DICT_DIR = 'dictionary'
-
-
-class OpenCC:
-    def __init__(self, conversion=None):
-        """
-        init OpenCC
-        :param conversion: the conversion of usage, options are
-         'hk2s', 's2hk', 's2t', 's2tw', 's2twp', 't2hk', 't2s', 't2tw', 'tw2s', and 'tw2sp'
-         check the json file names in config directory
-        :return: None
-        """
-        self.conversion_name = ''
-        self.conversion = conversion
-        self._dict_init_done = False
-        self._dict_chain = list()
-        self._dict_chain_data = list()
-        self.dict_cache = dict()
-        # List of sentence separators from OpenCC PhraseExtract.cpp. None of these separators are allowed as
-        # part of a dictionary entry
-        self.split_chars_re = re.compile(
-            r'(\s+|-|,|\.|\?|!|\*|　|，|。|、|；|：|？|！|…|“|”|‘|’|『|』|「|」|﹁|﹂|—|－|（|）|《|》|〈|〉|～|．|／|＼|︒|︑|︔|︓|︿|﹀|︹|︺|︙|︐|［|﹇|］|﹈|︕|︖|︰|︳|︴|︽|︾|︵|︶|｛|︷|｝|︸|﹃|﹄|【|︻|】|︼)')
-        if self.conversion is not None:
-            self._init_dict()
-
-    def convert(self, string):
-        """
-        Convert string from Simplified Chinese to Traditional Chinese or vice versa
-        """
-        if not self._dict_init_done:
-            self._init_dict()
-            self._dict_init_done = True
-
-        result = []
-        # Separate string using the list of separators in a regular expression
-        split_string_list = self.split_chars_re.split(string)
-        for i in range(0, len(split_string_list)):
-            if i % 2 == 0:
-                # Work with the text string
-                # Append converted string to result
-                result.append(self._convert(split_string_list[i], self._dict_chain_data))
-            else:
-                # Work with the separator
-                # Append separator string to converted_string
-                result.append(split_string_list[i])
-        # Join it all together to return a result
-        return "".join(result)
-
-    def _convert(self, string, dictionary = [], is_dict_group = False):
-        """
-        Convert string from Simplified Chinese to Traditional Chinese or vice versa
-        If a dictionary is part of a group of dictionaries, stop conversion on a word
-        after the first match is found.
-        :param string: the input string
-        :param dictionary: list of dictionaries to be applied against the string
-        :param is_dict_group: indicates if this is a group of dictionaries in which only
-                              the first match in the dict group should be used
-        :return: converted string
-        """
-        tree = StringTree(string)
-        for c_dict in dictionary:
-            if isinstance(c_dict, dict):
-                tree.convert_tree(c_dict)
-                if not is_dict_group:
-                    # Don't reform the string here if the dictionary list is part of a group
-                    # Recreate the tree for next loop iteration
-                    tree = StringTree("".join(tree.inorder()))
-            else:
-                # This is a list of dictionaries. Call back in with the dictionary
-                # list but specify that this is a group
-                tree = StringTree(self._convert("".join(tree.inorder()), c_dict, True))
-        return "".join(tree.inorder())
-
-    def _init_dict(self):
-        """
-        initialize the dict with chosen conversion
-        :return: None
-        """
-        if self.conversion is None:
-            raise ValueError('conversion is not set')
-
-        self._dict_chain = []
-        config = self.conversion + '.json'
-        config_file = os.path.join( WorkPath ,'opencc', CONFIG_DIR, config)
-        with open(config_file) as f:
-            setting_json = json.load(f)
-
-        self.conversion_name = setting_json.get('name')
-
-        for chain in setting_json.get('conversion_chain'):
-            self._add_dict_chain(self._dict_chain, chain.get('dict'))
-
-        self._dict_chain_data = []
-        self._add_dictionaries(self._dict_chain, self._dict_chain_data)
-        self._dict_init_done = True
-
-    def _add_dictionaries(self, chain_list, chain_data):
-        for item in chain_list:
-            if isinstance(item, list):
-                chain = []
-                self._add_dictionaries(item, chain)
-                chain_data.append(chain)
-            else:
-                if not item in self.dict_cache:
-                    map_dict = {}
-                    with io.open(item, "r", encoding="utf-8") as f:
-                        for line in f:
-                            key, value = line.strip().split('\t')
-                            map_dict[key] = value
-                    chain_data.append(map_dict)
-                    self.dict_cache[item] = map_dict
-                else:
-                    chain_data.append(self.dict_cache[item])
-
-    def _add_dict_chain(self, dict_chain, dict_dict):
-        """
-        add dict chain
-        :param dict_chain: the dict chain to add to
-        :param dict_dict: the dict to be added in
-        :return: None
-        """
-        if dict_dict.get('type') == 'group':
-            # Create a sublist of dictionaries for a group
-            chain = []
-            for dict_item in dict_dict.get('dicts'):
-                self._add_dict_chain(chain, dict_item)
-            dict_chain.append(chain)
-        elif dict_dict.get('type') == 'txt':
-            filename = dict_dict.get('file')
-            dict_file = os.path.join( WorkPath ,'opencc', DICT_DIR, filename)
-            dict_chain.append(dict_file)
-
-    def set_conversion(self, conversion):
-        """
-        set conversion
-        :param conversion: the conversion of usage, options are
-         'hk2s', 's2hk', 's2t', 's2tw', 's2twp', 't2hk', 't2s', 't2tw', 'tw2s', and 'tw2sp'
-         check the json file names in config directory
-        :return: None
-        """
-        if self.conversion == conversion:
-            return
-        else:
-            self._dict_init_done = False
-            self.conversion = conversion
 
 class StringTree:
     """
@@ -250,15 +111,11 @@ class StringTree:
 
 WorkPath = os.path.abspath(os.path.join(sys.argv[0],os.path.pardir)) #應用程式絕對路徑
 EpubFilePath = sys.argv #epub檔案絕對路徑
-OpenccPath = WorkPath + '\opencc' #opencc絕對路徑
-OpenccConfig = {"s2t":['STPhrases.txt','STCharacters.txt'],"t2s":['TSPhrases.txt','TSCharacters.txt'],"s2tw":['STPhrases.txt','STCharacters.txt','TWVariants.txt'],"tw2s":['TSPhrases.txt','TWVariantsRevPhrases.txt','TWVariantsRev.txt','TSCharacters.txt']}
 format_mode_list = ['Horizontal','Straight']
 
 import time, json
 
 class Config_LoadFailed(Exception):
-    pass
-class Check_OpenCCNotFound(Exception):
     pass
 class Config_ModeErrror(Exception):
     pass
@@ -291,59 +148,32 @@ class config:
         # 讀取設定檔
         """
         try:
-            if not os.path.isfile(f'{WorkPath}\config.json'):
+            if not os.path.isfile(f'{WorkPath}/config.json'):
                 raise Config_LoadFailed(f'>> config.load : 缺少設定檔')
-            with open(f'{WorkPath}\config.json' , 'r',encoding='utf-8') as reader:
+            with open(f'{WorkPath}/config.json' , 'r',encoding='utf-8') as reader:
                 config = json.loads(reader.read())
             if config['format'] not in format_mode_list:
                 raise Config_FormatErrror(f'>> config.load : config.json 中 format 設定錯誤，請確定 Horizontal(橫) 或 Straight(直)')
-            if config['mode'] not in OpenccConfig:
-                raise Config_ModeErrror(f'>> config.load : config.json 中 mode 設定錯誤，(簡轉繁)s2t,(繁轉簡)t2s')
+            config['mode'] = "t2s"
             return config
         except Config_FormatErrror as e:
             log.write(f'{str(e)}')
             print(f'{str(e)}')
-            os.system("pause")
             sys.exit(0)
         except Config_ModeErrror as e:
             log.write(f'{str(e)}')
             print(f'{str(e)}')
-            os.system("pause")
             sys.exit(0)
         except Config_LoadFailed as e:
             log.write(f'{str(e)}')
             print(f'{str(e)}')
-            os.system("pause")
             sys.exit(0)
         except Exception as e:
             log.write(f'>> config.load : 讀取設定檔發生錯誤 -> {str(e)}')
             print(f'>> config.load : 讀取設定檔發生錯誤 -> {str(e)}')
-            os.system("pause")
             sys.exit(0)
 
 class Check:
-    @staticmethod
-    def OpenCC(mode):
-        """
-        # 執行 OpenCC 確認\n
-        # Check.OpenCC(mode)
-        """
-        try:
-            for file in OpenccConfig[mode]:
-                if not os.path.isfile(f'{OpenccPath}\\dictionary\\{file}'):
-                    raise Check_OpenCCNotFound(f'>> Check.OpenCC({mode}) : 缺少翻譯檔 {file}')
-            if not os.path.isfile(f'{OpenccPath}\\config\\{mode}.json'):
-                raise Check_OpenCCNotFound(f'>> Check.OpenCC({mode}) : 缺少設定檔 {mode}.json')
-            return True
-        except Check_OpenCCNotFound as e:
-            log.write(str(e))
-            print(str(e))
-            return False
-        except Exception as e:
-            log.write(f'>> Check.OpenCC : 檢查 OpenCC 時發生錯誤 -> {str(e)}')
-            print(f'>> Check.OpenCC : 檢查 OpenCC 時發生錯誤 -> {str(e)}')
-            return False
-    
     @staticmethod
     def File(Files):
         """
@@ -409,7 +239,7 @@ class ZIP:
         """  
         try:
             zip_file = zipfile.ZipFile( Epubfile )  
-            unzippath = Epubfile + '_files\\'
+            unzippath = Epubfile + '_files/'
             if os.path.isdir( Epubfile + "_files"):  
                 pass  
             else:  
@@ -423,7 +253,14 @@ class ZIP:
             log.write(f'>> ZIP.unzip : 解壓縮發生錯誤 -> {str(e)}')
             print(f'>> ZIP.unzip : 解壓縮發生錯誤 -> {str(e)}')
             return False
+            
+def chs_to_cht(chs):
+    return json.loads(requests.post('https://api.zhconvert.org/convert', data = {'text': chs, 'converter': 'Taiwan'}).text)['data']['text']
 
+def utf8len(s):
+    return len(s.encode('utf-8'))
+
+max_body_bytes = int(json.loads(requests.get('https://api.zhconvert.org/service-info').text)['data']['maxPostBodyBytes'])
 
 class Convert:
     @staticmethod
@@ -438,7 +275,7 @@ class Convert:
             FileList = []
             CSSList = []
             CSSname = ''
-            for dirPath, dirNames, fileNames in os.walk(f'{Epubfile}_files\\'):
+            for dirPath, dirNames, fileNames in os.walk(f'{Epubfile}_files/'):
                 for file in fileNames:
                     if any(file.endswith(end) for end in ['opf', 'xhtml', 'html', 'htm','css']):
                         if not file.find('css')==-1:
@@ -541,7 +378,6 @@ class Convert:
         # 翻譯檔案\n
         # Convert.convert(mode,FileList)
         """
-        openCC = OpenCC(mode)
         while True:
             try:
                 for File in FileList:
@@ -561,11 +397,21 @@ class Convert:
                     else:
                         with open( File + '.new','w',encoding='UTF-8') as FileWrite:
                             print(f'>>>> 正在翻譯 {os.path.basename(File)} 中')
+                            Lines = ''
+                            Lines_byte = 0
                             for Line in FileLines:
-                                converted = openCC.convert(Line)
-                                FileWrite.write(converted)
+                                line_byte = utf8len(Line)
+                                if (Lines_byte + line_byte >= max_body_bytes):
+                                    converted = chs_to_cht(Lines)
+                                    FileWrite.write(converted)
+                                    Lines = Line
+                                    Lines_byte = line_byte
+                                else:
+                                    Lines += Line
+                                    Lines_byte += line_byte
+                            converted = chs_to_cht(Lines)
+                            FileWrite.write(converted)
                 return True
-                break
             except Exception as e:
                 print(f'>> Convert.convert : 轉換發生錯誤 -> {str(e)}')
                 log.write(f'>> Convert.convert : 轉換發生錯誤 -> {str(e)}')
@@ -597,9 +443,8 @@ class Convert:
         # 翻譯檔案名稱\n
         # Convert.FileName(mode,FilePath)
         """
-        openCC = OpenCC(mode)
         Path = os.path.dirname( FilePath )
-        FileName = openCC.convert(os.path.basename( FilePath ))
+        FileName = chs_to_cht(os.path.basename( FilePath ))
         return os.path.join(Path,FileName)
 
     @staticmethod
@@ -664,20 +509,19 @@ def main():
         setting = config.load()
         if len(EpubFilePath) > 1:
             for index in range(len(EpubFilePath)-1):
-                if Check.OpenCC(setting['mode']) and Check.File(EpubFilePath[index+1]):
+                if Check.File(EpubFilePath[index+1]):
                     FileList = ZIP.unzip(EpubFilePath[index+1])
                     if not FileList == None:
                         if Convert.convert(setting['mode'],FileList):
                             if Convert.Rename(FileList):
                                 if Convert.format(EpubFilePath[index+1],format_mode=setting['format']):
                                     ZIP.zip(f'{EpubFilePath[index+1]}_files',os.path.splitext(Convert.FileName(setting['mode'],EpubFilePath[index+1]))[0]+'_tc.epub')
+        
                 #Convert.clean(f'{EpubFilePath[index+1]}_files')
         else:
             print('\n>> 請將Epub檔案直接拖曳到本程式中執行翻譯\n')
     except Exception as e:
         log.write(f'發生錯誤 : {str(e)}')
         print(f'發生錯誤 : {str(e)}')
-        os.system("pause")
 if __name__ == '__main__':
     main()
-    os.system("pause")
