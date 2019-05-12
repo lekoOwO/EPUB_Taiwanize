@@ -2,6 +2,7 @@ from epubconv.epubconv import convertEPUB, config
 import asyncio
 import websockets
 import uuid
+import os
 
 settings = config.load()
 
@@ -21,6 +22,8 @@ async def api(websocket, path):
         await websocket.send("正在傳輸轉換結果...")
         with open(result['url'], "rb") as f:
             await websocket.send(f.read())
+        os.remove(result['url'])
+        
     else:
         await websocket.send(f"轉換失敗。\n錯誤: {result['error']}")
 
