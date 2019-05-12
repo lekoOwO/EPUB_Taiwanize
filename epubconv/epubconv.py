@@ -528,7 +528,7 @@ def convertEPUB(path, cb):
     try:
         setting = config.load()
         if Check.File(path):
-            FileList = ZIP.unzip(path, cb)
+            FileList = ZIP.unzip(path, cb=cb)
             os.remove(path)
             if not FileList == None:
                 if Convert.convert(setting['mode'], FileList, cb=cb):
