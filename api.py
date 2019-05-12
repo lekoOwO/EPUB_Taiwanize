@@ -5,8 +5,6 @@ import os
 from threading import Timer, Thread
 
 settings = config.load()
-def send(websocket, *args):
-    Thread(target=lambda: asyncio.new_event_loop().run_until_complete(websocket.send(*args))).start()
 
 async def api(websocket, path):
     file_path = f'./temp/{await websocket.recv()}.epub'
