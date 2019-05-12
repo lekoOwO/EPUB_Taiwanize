@@ -16,7 +16,7 @@ async def api(websocket, path):
     if (result['status']):
         await websocket.send("正在傳輸轉換結果...")
         await websocket.send(result['url'])
-        t = Timer(settings['tempTime'], lambda: os.remove(result['url']) if os.path.isfile(result['url']))
+        t = Timer(settings['tempTime'], lambda x: os.remove(x) if os.path.isfile(x) else None, [result['url']])
         t.start()
         
     else:
