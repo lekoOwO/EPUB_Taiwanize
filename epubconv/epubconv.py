@@ -534,7 +534,7 @@ def convertEPUB(path, cb):
                 if Convert.convert(setting['mode'], FileList, cb=cb):
                     if Convert.Rename(FileList, cb=cb):
                         if Convert.format(path,format_mode=setting['format'], cb=cb):
-                            converted = f'{path}_files',os.path.splitext(Convert.FileName(setting['mode'],path))[0]+'.tw.epub'
+                            converted = os.path.splitext(Convert.FileName(setting['mode'],path))[0]+'.tw.epub'
                             ZIP.zip(f'{path}_files', converted, cb=cb)
                             return {
                                 'status': True,

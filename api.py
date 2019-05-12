@@ -1,8 +1,8 @@
 from epubconv.epubconv import convertEPUB, config
 import asyncio
 import websockets
-import uuid
 import os
+from threading import Timer
 
 settings = config.load()
 
@@ -11,18 +11,13 @@ def send(websocket, *args):
     loop.create_task(websocket.send(*args))
 
 async def api(websocket, path):
-    file_path = f'./temp/{str(uuid.uuid4())}.epub'
-    with open(file_path, "wb") as output_file:
-        output_file.write(await websocket.recv())
-    
-    await websocket.send("檔案傳輸完成。")
-
+    file_path = await websocket.recv()
     result = convertEPUB(file_path, lambda x: send(websocket, x))
     if (result['status']):
         await websocket.send("正在傳輸轉換結果...")
-        with open(result['url'], "rb") as f:
-            await websocket.send(f.read())
-        os.remove(result['url'])
+        await websocket.send(result['url'])
+        t = Timer(settings['tempTime'], lambda: os.remove(result['url']) if os.path.isfile(result['url']))
+        t.start()
         
     else:
         await websocket.send(f"轉換失敗。\n錯誤: {result['error']}")

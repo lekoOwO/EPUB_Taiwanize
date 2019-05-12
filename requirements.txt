@@ -1,2 +1,4 @@
 requests
 websockets
+flask
+gunicorn
