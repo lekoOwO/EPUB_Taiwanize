@@ -2,5 +2,6 @@
     "format": "Horizontal",
     "apiPort": 3000,
     "apiHost": "localhost",
-    "tempTime": 10800
+    "tempTime": 10800,
+    "maxFileSize": 200
 }

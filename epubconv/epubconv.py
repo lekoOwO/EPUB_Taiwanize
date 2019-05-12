@@ -33,9 +33,9 @@ import json
 import re
 import sys
 import requests
+import uuid
 
-CONFIG_DIR = 'config'
-DICT_DIR = 'dictionary'
+CONFIG_DIR = os.path.dirname(os.path.abspath(__file__)) + '/../'
 
 class StringTree:
     """
@@ -109,8 +109,7 @@ class StringTree:
 # 2018,07,18
 ###########################################
 
-WorkPath = os.path.abspath(os.path.join(sys.argv[0],os.path.pardir)) #應用程式絕對路徑
-EpubFilePath = sys.argv #epub檔案絕對路徑
+WorkPath = os.path.dirname(os.path.abspath(__file__)) + '/../' #應用程式絕對路徑
 format_mode_list = ['Horizontal','Straight']
 
 import time, json
@@ -504,7 +503,7 @@ class log:
         with open( f'{WorkPath}/epubconv.log','a',encoding='UTF-8') as logfile:
             logfile.write(log._get_time()+' '+message+'\n')
 
-def main(EpubFilePath = EpubFilePath):
+def main(EpubFilePath = sys.argv):
     try:
         setting = config.load()
         if len(EpubFilePath) > 1:
@@ -533,12 +532,13 @@ def convertEPUB(path, cb):
             if not FileList == None:
                 if Convert.convert(setting['mode'], FileList, cb=cb):
                     if Convert.Rename(FileList, cb=cb):
-                        if Convert.format(path,format_mode=setting['format'], cb=cb):
-                            converted = os.path.splitext(Convert.FileName(setting['mode'],path))[0]+'.tw.epub'
+                        if Convert.format(path, format_mode=setting['format'], cb=cb):
+                            file_id = str(uuid.uuid4())
+                            converted = f'./temp/{file_id}.epub'
                             ZIP.zip(f'{path}_files', converted, cb=cb)
                             return {
                                 'status': True,
-                                'url': converted
+                                'id': file_id
                             }
     except Exception as e:
         return {

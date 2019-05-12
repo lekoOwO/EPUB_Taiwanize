@@ -1,4 +1,5 @@
 requests
 websockets
 flask
-gunicorn
+gunicorn; platform_system != "Windows"
+waitress; platform_system == "Windows"
