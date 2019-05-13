@@ -2,6 +2,8 @@
     "format": "Horizontal",
     "apiPort": 3000,
     "apiHost": "localhost",
+    "wsHost": "localhost",
+    "wsPort": 3001,
     "tempTime": 10800,
     "maxFileSize": 200
 }

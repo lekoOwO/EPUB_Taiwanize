@@ -10,14 +10,9 @@ async def api(websocket, path):
     file_path = f'./temp/{await websocket.recv()}.epub'
     result = await convertEPUB(file_path, lambda x:websocket.send(x))
     if (result['status']):
+        Timer(settings['tempTime'], lambda x: os.remove(x) if os.path.isfile(x) else None, [f"./temp/{result['id']}.epub"]).start()
         await websocket.send(">>>>> 正在傳輸轉換結果...")
         await websocket.send(result['id'])
-
-        confirm = await websocket.recv()
-        while (confirm != result['id']):
-            confirm = await websocket.recv()
-
-        Timer(settings['tempTime'], lambda x: os.remove(x) if os.path.isfile(x) else None, [f"./temp/{result['id']}.epub"]).start()
         
     else:
         await websocket.send(f"轉換失敗。\n錯誤: {result['error']}")
@@ -30,4 +25,3 @@ async def start_server():
 loop = asyncio.get_event_loop()
 loop.create_task(start_server())
 loop.run_forever()
-
