@@ -1,0 +1,39 @@
+#uploader {
+    margin-top: 25px;
+    padding: 0em;
+    position: relative;
+    height: 150px;
+}
+
+#uploader>.header {
+    padding-top: 2em;
+    padding-bottom: .5em;
+}
+
+#uploader #upload {
+    z-index: 5;
+    font-size: 30px;
+    cursor: pointer;
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    opacity: 0;
+}
+
+#zhconvert {
+    margin: 5px 0;
+    text-align: right;
+}
+
+#loader.active {
+    margin: 25px auto;
+}
+
+#ws {
+    max-height: 250px;
+    overflow: scroll
+}
+
+#done {
+    text-align: center;
+}
