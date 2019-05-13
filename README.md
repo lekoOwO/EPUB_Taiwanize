@@ -14,7 +14,7 @@ Convert EPUB from zh_CN to zh_TW using [ZHConvert](https://zhconvert.org/)
 `python3 main.py YOUR_EPUB_FILE`
 
 ## API
-[文件](../API.md)
+[文件](../../API.md)
 
 ## Update history 更新歷史
 * 1.0.1
