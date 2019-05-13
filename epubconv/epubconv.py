@@ -177,7 +177,7 @@ class config:
 
 class Check:
     @staticmethod
-    def File(Files):
+    async def File(Files, cb=print_async):
         """
         # 執行檔案確認\n
         # Check.File(Files)
@@ -188,11 +188,11 @@ class Check:
             return True
         except Check_FileNotEPUB as e:
             log.write(f'{str(e)}')
-            print(f'{str(e)}')
+            await cb(f'{str(e)}')
             return False
         except Exception as e:
             log.write(f'>> Check.File : 發生無法處理問題 -> {str(e)}')
-            print(f'>> Check.File : 發生無法處理問題 -> {str(e)}')
+            await cb(f'>> Check.File : 發生無法處理問題 -> {str(e)}')
             return False
             
 
@@ -511,7 +511,7 @@ async def main(EpubFilePath = sys.argv):
         setting = config.load()
         if len(EpubFilePath) > 1:
             for index in range(len(EpubFilePath)-1):
-                if Check.File(EpubFilePath[index+1]):
+                if await Check.File(EpubFilePath[index+1]):
                     FileList = await ZIP.unzip(EpubFilePath[index+1])
                     if not FileList == None:
                         if await Convert.convert(setting['mode'],FileList):
@@ -529,7 +529,7 @@ async def main(EpubFilePath = sys.argv):
 async def convertEPUB(path, cb):
     try:
         setting = config.load()
-        if Check.File(path):
+        if await Check.File(path, cb):
             FileList = await ZIP.unzip(path, cb=cb)
             os.remove(path)
             if not FileList == None:
