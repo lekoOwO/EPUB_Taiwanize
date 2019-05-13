@@ -1,8 +1,5 @@
 
 # API
-
-  
-
 ## Run 運行
 
   
@@ -32,12 +29,9 @@
   
 
 ## Usage 使用
-
-  
-
 ### File Server
 
-####`GET /{file_id}`
+#### `GET /{file_id}`
 
   
 
@@ -57,7 +51,7 @@ Get a file by file id.
 ```
 {
 
-	"file": File
+  "file": File
 
 }
 ```
@@ -74,7 +68,7 @@ Get a file by file id.
 Upload a EPUB book.
 
   
-
+---
 ### Websocket Server
 
 After the connection established, send a file_id to start the convertion. The progress will be sent continuously until the convertion is finished, and the file_id of the converted EPUB will be sent.
