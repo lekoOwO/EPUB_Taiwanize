@@ -8,7 +8,7 @@ html
 		meta(charset="UTF-8")
 		meta(property="og:type" content="website")
 		meta(property="og:site_name" content="吼吼 Epug 好朋友")
-		meta(property="og:image" content="/img/open-graph.jpg")
+		meta(property="og:image" content="/static/img/open-graph.jpg")
 		link(href='//cdnjs.cloudflare.com/ajax/libs/tocas-ui/2.3.3/tocas.css',rel='stylesheet')
 		link(href='/static/css/style.css',rel='stylesheet')
 	body
@@ -22,18 +22,17 @@ html
 				i.upload.symbol.icon
 				span.header 上傳 Epub 檔案
 				span.description 將檔案拖拉至此處或是點擊此處來選取檔案。
+			pre#ws
 			#zhconvert 本程式使用了  
 				a(href='https://zhconvert.org/') 繁化姬
 				|  的 API 服務
 			#loader.ts.centered.inline.loader.text.indeterminate 正在將檔案發給小恐龍！
-			pre#ws
 			#done(style='display:none')
 				a.ts.primary.labeled.icon.button(download="")
 					i.download.icon
 				p 轉換完畢！
 
 
-		//a.item(href='//github.com/rexx0520/EPUB_Taiwanize', target='_blank') GitHub
 		script(src='https://code.jquery.com/jquery-3.2.1.min.js')
 		script(src='https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js')
 		script(src='/static/js/index.js')
