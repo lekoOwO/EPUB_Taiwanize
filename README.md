@@ -16,6 +16,14 @@ Convert EPUB from zh_CN to zh_TW using [ZHConvert](https://zhconvert.org/)
 ## API
 [文件](API.md)
 
+## Docker
+Build and run the Dockerfile.
+Forward a.b.tld to port 3000 of the container, a.ws.b.tld to port 3001.
+Example: epub.example.com -> 3000, epub.ws.example.com -> 3001
+
+build 並 run Dockerfile 後，將 a.b.tld 網域對應至容器內 Port 3000，a.ws.b.tld 對應至容器內 Port 3001
+舉例: epub.example.com -> 3000, epub.ws.example.com -> 3001
+
 ## Update history 更新歷史
 * 1.0.1
 新增網頁 API 功能
