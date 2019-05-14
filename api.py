@@ -19,8 +19,8 @@ async def api(websocket, path):
 
 async def start_server():
     print("///// EPUB 轉換服務已啟動 /////")
-    await websockets.serve(api, settings["apiHost"], settings["apiPort"])
-    print(f'ws://{settings["apiHost"]}:{settings["apiPort"]}')
+    await websockets.serve(api, settings["wsHost"], settings["wsPort"])
+    print(f'ws://{settings["wsHost"]}:{settings["wsPort"]}')
     
 loop = asyncio.get_event_loop()
 loop.create_task(start_server())
