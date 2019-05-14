@@ -1,5 +1,7 @@
-const wsUri = "ws://localhost:3000/";
-const httpUri = "http://127.0.0.1:3001/";
+const httpUri = window.location.origin + "/";
+let tmp = window.location.hostname.split('.')
+tmp.splice(1, 0, 'ws')
+const wsUri = tmp.join('.')
 
 async function handleFile(e) {
     openWebSocket()
