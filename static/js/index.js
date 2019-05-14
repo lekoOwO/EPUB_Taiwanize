@@ -1,7 +1,7 @@
 const httpUri = window.location.origin + "/";
 let tmp = window.location.hostname.split('.')
 tmp.splice(1, 0, 'ws')
-const wsUri = tmp.join('.')
+const wsUri = `wss://${tmp.join('.')}`
 
 async function handleFile(e) {
     openWebSocket()
