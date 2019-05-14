@@ -8,7 +8,7 @@
     <meta charset="UTF-8">
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="吼吼 Epug 好朋友">
-    <meta property="og:image" content="/img/open-graph.jpg">
+    <meta property="og:image" content="/static/img/open-graph.jpg">
     <link href="//cdnjs.cloudflare.com/ajax/libs/tocas-ui/2.3.3/tocas.css" rel="stylesheet">
     <link href="/static/css/style.css" rel="stylesheet">
   </head>
@@ -20,14 +20,13 @@
       <div class="ts basic dashed clickable slate" id="uploader">
         <input id="upload" type="file"><i class="upload symbol icon"></i><span class="header">上傳 Epub 檔案</span><span class="description">將檔案拖拉至此處或是點擊此處來選取檔案。</span>
       </div>
+      <pre id="ws"></pre>
       <div id="zhconvert">本程式使用了  <a href="https://zhconvert.org/">繁化姬</a> 的 API 服務</div>
       <div class="ts centered inline loader text indeterminate" id="loader">正在將檔案發給小恐龍！</div>
-      <pre id="ws"></pre>
       <div id="done" style="display:none"><a class="ts primary labeled icon button" download=""><i class="download icon"></i></a>
         <p>轉換完畢！</p>
       </div>
     </div>
-    <!--a.item(href='//github.com/rexx0520/EPUB_Taiwanize', target='_blank') GitHub-->
     <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js"></script>
     <script src="/static/js/index.js"></script>
