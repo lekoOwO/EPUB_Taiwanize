@@ -26,6 +26,8 @@ build 並 run Dockerfile 後，將 a.b.tld 網域對應至容器內 Port 3000，
 
 ## Update history 更新歷史
 * 1.0.1
+新增翻譯模式選擇 (cht / chs / 2chs2cht)
+* 1.0.1
 新增網頁 API 功能
 * 1.0.0
 Init Release.
