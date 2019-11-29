@@ -5,5 +5,6 @@
     "wsHost": "0.0.0.0",
     "wsPort": 3001,
     "tempTime": 10800,
-    "maxFileSize": 200
+    "maxFileSize": 200,
+    "mode": "2chs2cht"
 }

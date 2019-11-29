@@ -156,7 +156,6 @@ class config:
                 config = json.loads(reader.read())
             if config['format'] not in format_mode_list:
                 raise Config_FormatErrror(f'>> config.load : config.json 中 format 設定錯誤，請確定 Horizontal(橫) 或 Straight(直)')
-            config['mode'] = "t2s"
             return config
         except Config_FormatErrror as e:
             log.write(f'{str(e)}')
@@ -255,9 +254,23 @@ class ZIP:
             log.write(f'>> ZIP.unzip : 解壓縮發生錯誤 -> {str(e)}')
             await cb(f'>> ZIP.unzip : 解壓縮發生錯誤 -> {str(e)}')
             return False
-            
-def chs_to_cht(chs):
-    return json.loads(requests.post('https://api.zhconvert.org/convert', data = {'text': chs, 'converter': 'Taiwan'}).text)['data']['text']
+
+setting = config.load()
+if setting["mode"] == "cht":
+    def translate(chs):
+        return json.loads(requests.post('https://api.zhconvert.org/convert', data = {'text': chs, 'converter': 'Taiwan'}).text)['data']['text']
+elif setting["mode"] == "chs":
+    def translate(cht):
+        return json.loads(requests.post('https://api.zhconvert.org/convert', data = {'text': cht, 'converter': 'Simplified'}).text)['data']['text']
+elif setting["mode"] == "2chs2cht":
+    def translate(cht):
+        chs = json.loads(requests.post('https://api.zhconvert.org/convert', data = {'text': cht, 'converter': 'Simplified'}).text)['data']['text']
+        cht2 = json.loads(requests.post('https://api.zhconvert.org/convert', data = {'text': chs, 'converter': 'Taiwan'}).text)['data']['text']
+        return cht2
+else:
+    log.write('>> translate : 模式錯誤 (mode 應為 cht/chs/2chs2cht 之一)')
+    print('>> translate : 模式錯誤 (mode 應為 cht/chs/2chs2cht 之一)')
+    sys.exit(0)
 
 def utf8len(s):
     return len(s.encode('utf-8'))
@@ -387,9 +400,9 @@ class Convert:
                         regex = re.compile(r"<dc:language>[\S]*</dc:language>", re.IGNORECASE)
                         fileline = open(File,encoding='utf-8').read()
                         m = re.findall(regex,fileline)
-                        if mode=='s2t' or mode=='s2tw':
+                        if mode.endswith('cht'):
                             modify = re.sub(regex,f'<dc:language>zh-TW</dc:language>',fileline)
-                        if mode=='t2s' or mode=='tw2s':
+                        elif mode.endswith('chs'):
                             modify = re.sub(regex,f'<dc:language>zh-CN</dc:language>',fileline)
                         open(File,'w',encoding='utf-8').write(modify)
                     with open(File,'r',encoding='utf-8') as FileRead:
@@ -404,14 +417,14 @@ class Convert:
                             for Line in FileLines:
                                 line_byte = utf8len(Line)
                                 if (Lines_byte + line_byte >= max_body_bytes):
-                                    converted = chs_to_cht(Lines)
+                                    converted = translate(Lines)
                                     FileWrite.write(converted)
                                     Lines = Line
                                     Lines_byte = line_byte
                                 else:
                                     Lines += Line
                                     Lines_byte += line_byte
-                            converted = chs_to_cht(Lines)
+                            converted = translate(Lines)
                             FileWrite.write(converted)
                 return True
             except Exception as e:
@@ -446,7 +459,7 @@ class Convert:
         # Convert.FileName(mode,FilePath)
         """
         Path = os.path.dirname( FilePath )
-        FileName = chs_to_cht(os.path.basename( FilePath ))
+        FileName = translate(os.path.basename( FilePath ))
         return os.path.join(Path,FileName)
 
     @staticmethod
